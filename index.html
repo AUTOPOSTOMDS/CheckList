@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Envio de Foto ao Vivo</title>
+</head>
+<body>
+  <h2>Envie sua foto</h2>
+  <form id="formulario">
+    <label>Nome:</label><br />
+    <input type="text" name="nome" required><br><br>
+
+    <label>Tire uma foto:</label><br />
+    <input type="file" name="foto" accept="image/*" capture="environment" required><br><br>
+
+    <button type="submit">Enviar</button>
+  </form>
+
+  <p id="mensagem"></p>
+
+  <script>
+    document.getElementById("formulario").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const arquivo = form.foto.files[0];
+      const nome = form.nome.value;
+
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        const base64 = reader.result.split(',')[1];
+        const dados = new FormData();
+        dados.append("nome", nome);
+        dados.append("foto", base64);
+
+        fetch("https://script.google.com/macros/s/AKfycbxKvy_CocoOUI_uaB17IZLE7DXMU_LRKSTmrsj3jAWxSzZjSme0plCj-b7MP_U-4wbSJg/exec", {
+          method: "POST",
+          body: dados,
+        })
+        .then(res => res.text())
+        .then(txt => {
+          document.getElementById("mensagem").innerText = txt;
+          form.reset();
+        })
+        .catch(err => {
+          document.getElementById("mensagem").innerText = "Erro ao enviar: " + err;
+        });
+      };
+
+      reader.readAsDataURL(arquivo);
+    });
+  </script>
+</body>
+</html>
